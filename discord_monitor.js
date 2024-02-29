@@ -15,7 +15,7 @@ client.on('messageCreate', async (message) => {
     content = message.content;
 
     if (message.attachments.first()) {
-      attachments = message.attachments.map(attachment => attachment.url).join('\n');
+      attachments = message.attachments.map(attachment => "```" + attachment.name + " - " + attachment.contentType + ":\n" + attachment.url + "```").join('\n');
       await sendToWebhook(message.guild.name, message.channel.name, author_name, content, attachments);
     } else {
       attachments = "";
@@ -25,21 +25,21 @@ client.on('messageCreate', async (message) => {
 })
 
 //create a function to send a message with text and or attachments to the slack webhook
-async function sendToWebhook(server, channel, author_name, message_content, message_attachment) {
+async function sendToWebhook(server, channel, author_name, message_content, message_attachments) {
   const axios = require('axios');
-  newDate = new Date().toLocaleString();;
+  newDate = new Date().toLocaleString();
   try {
     if (message_content === "") {
       data = {
-        'text': ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`\n" + message_attachment
+        'text': ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`\n`Attachments:`\n" + message_attachments
       };
-    } else if (message_attachment === "") {
+    } else if (message_attachments === "") {
       data = {
-        'text': ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`\n```" + message_content + "```"
+        'text': ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`\n`Message Content:`\n```" + message_content + "```"
       };
     } else {
       data = {
-        'text': ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`\n```" + message_content + "```\n" + message_attachment
+        'text': ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`\n`Message Content:`\n```" + message_content + "```\n`Attachments:`\n" + message_attachments
       };
     }
     await axios.post(webhook, data);
