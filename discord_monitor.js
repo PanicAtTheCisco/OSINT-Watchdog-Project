@@ -3,7 +3,7 @@ const client = new Client();
 
 const {token} = require('./config.json');
 const { webhook } = require('./config.json');
-const {channelId} = require('./config.json');
+const {channelId} = 1034923510054780938;
 
 client.on('ready', async () => {
   console.log(`${client.user.username} is ready!`);
