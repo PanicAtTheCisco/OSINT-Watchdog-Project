@@ -10,27 +10,42 @@ client.on('ready', async () => {
 })
 
 client.on('messageCreate', async (message) => {
-  if (message.channel.channelId === channelId && message.attachments.size > 0) {
+  if (message.channel.channelId === channelId) {
     author_name = message.author.username;
     content = message.content;
-    attachment = message.attachments.first().url;
-    await sendToWebhook(message.guild.name, message.channel.name, author_name, content, attachment);
+
+    if (message.attachments.first()) {
+      attachments = message.attachments.map(attachment => attachment.url).join('\n');
+      await sendToWebhook(message.guild.name, message.channel.name, author_name, content, attachments);
+    } else {
+      attachments = "";
+      await sendToWebhook(message.guild.name, message.channel.name, author_name, content, attachments);
+    }
   }
 })
 
-//create a function to send the message to the slack webhook
+//create a function to send a message with text and or attachments to the slack webhook
 async function sendToWebhook(server, channel, author_name, message_content, message_attachment) {
   const axios = require('axios');
   newDate = new Date().toLocaleString();;
   try {
-    const data = {
-      'text': newDate + ": New message on Discord in " + server + ": #" + channel + " by " + author_name + ": " + message_content + "\n" + message_attachment
-    };
+    if (message_content === "") {
+      data = {
+        'text': ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`\n" + message_attachment
+      };
+    } else if (message_attachment === "") {
+      data = {
+        'text': ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`\n```" + message_content + "```"
+      };
+    } else {
+      data = {
+        'text': ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`\n```" + message_content + "```\n" + message_attachment
+      };
+    }
     await axios.post(webhook, data);
     console.log("Message sent successfully!");
   } catch (error) {
     console.error("Failed to send message:", error);
-    throw error;
   }
 }
 
