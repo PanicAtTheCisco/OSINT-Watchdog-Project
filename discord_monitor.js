@@ -1,9 +1,9 @@
 const { Client } = require('discord.js-selfbot-v13');
 const client = new Client();
 
-const {token} = require('./config.json');
+const { token } = require('./config.json');
 const { webhook } = require('./config.json');
-const {channelId} = require('./config.json');
+const { channelId } = require('./config.json');
 
 client.on('ready', async () => {
   console.log(`${client.user.username} is ready!`);
