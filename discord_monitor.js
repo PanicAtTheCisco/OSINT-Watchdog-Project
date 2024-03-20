@@ -3,14 +3,14 @@ const client = new Client();
 
 const { token } = require('./config.json');
 const { webhook } = require('./config.json');
-const { channel } = require('./config.json');
+const { channelId } = require('./config.json');
 
 client.on('ready', async () => {
   console.log(`${client.user.username} is ready!`);
 })
 
 client.on('messageCreate', async (message) => {
-  if (message.channel.id === channel) {
+  if (message.channel.id === channelId) {
     author_name = message.author.username;
     content = message.content;
 
