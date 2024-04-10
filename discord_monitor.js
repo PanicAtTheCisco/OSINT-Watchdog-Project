@@ -12,14 +12,21 @@ client.on('ready', async () => {
 client.on('messageCreate', async (message) => {
   if (message.channel.id === channelId) {
     author_name = message.author.username;
-    content = message.content;
+    server = message.guild.name;
+    channel_name = message.channel.name;
+
+    if (message.content === "") {
+      content = "";
+    } else {
+      content = "```" + message.content + "```";
+    }
 
     if (message.attachments.first()) {
       attachments = message.attachments.map(attachment => "```" + attachment.name + " - " + attachment.contentType + ":\n" + attachment.url + "```").join('\n');
-      await sendToWebhook(message.guild.name, message.channel.name, author_name, content, attachments);
+      await sendToWebhook(server, channel_name, author_name, content, attachments);
     } else {
       attachments = "";
-      await sendToWebhook(message.guild.name, message.channel.name, author_name, content, attachments);
+      await sendToWebhook(server, channel_name, author_name, content, attachments);
     }
   }
 })
@@ -27,21 +34,74 @@ client.on('messageCreate', async (message) => {
 //create a function to send a message with text and or attachments to the slack webhook
 async function sendToWebhook(server, channel, author_name, message_content, message_attachments) {
   const axios = require('axios');
+  const { isIP } = require('net');
   newDate = new Date().toLocaleString();
+  ips = "";
+  domains = "";
+
+  const ipRegex = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
+  const ipArray = message_content.match(ipRegex) || [];
+  const validIpArray = ipArray.filter(ip => {
+    const parts = ip.split('.');
+    return parts.every(part => parseInt(part, 10) >= 1 && parseInt(part, 10) <= 255);
+  });
+
+  const domainRegex = /(?:[a-z]+\.[a-z]{2,})/gi;
+  domainArray = message_content.match(domainRegex) || [];
+
+  if (ipArray.length !== 0) {
+    ips = "```" + validIpArray.join("\n") + "```";
+  }
+  if (domainArray.length !== 0) {
+    domains = "```" + domainArray.join("\n") + "```";
+  }
+
   try {
-    if (message_content === "") {
-      data = {
-        'text': ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`\n`Attachments:`\n" + message_attachments
-      };
-    } else if (message_attachments === "") {
-      data = {
-        'text': ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`\n`Message Content:`\n```" + message_content + "```"
-      };
-    } else {
-      data = {
-        'text': ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`\n`Message Content:`\n```" + message_content + "```\n`Attachments:`\n" + message_attachments
-      };
-    }
+    data = {
+      "text": "New message in Discord!",
+      "blocks": [
+        {
+          "type": "section",
+          "block_id": "header",
+          'text': {
+            "type": "mrkdwn",
+            "text": ">" + newDate + "\n>`Discord:` New message in `" + server + ": #" + channel + " by " + author_name + "`"
+          }
+        },
+        {
+          "type": "section",
+          "block_id": "content",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\n`Message Content:`\n" + message_content
+          }
+        },
+        {
+          "type": "section",
+          "block_id": "ip",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\n`IP Addresses:`\n" + ips
+          }
+        },
+        {
+          "type": "section",
+          "block_id": "domain",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\n`Domains:`\n" + domains
+          }
+        },
+        {
+          "type": "section",
+          "block_id": "attachments",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\n`Attachments:`\n" + message_attachments
+          }
+        }
+      ]
+    };
     await axios.post(webhook, data);
     console.log("Message sent successfully!");
   } catch (error) {
