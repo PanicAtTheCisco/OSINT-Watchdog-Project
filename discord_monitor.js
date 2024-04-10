@@ -45,7 +45,7 @@ async function sendToWebhook(server, channel, author_name, message_content, mess
   const ipArray = message_content.match(ipRegex) || [];
   const validIpArray = ipArray.filter(ip => {
     const parts = ip.split('.');
-    return parts.every(part => parseInt(part, 10) >= 1 && parseInt(part, 10) <= 255);
+    return parts.every(part => (parseInt(part, 10) >= 0 && parseInt(part, 10) <= 255) || part === '0');
   });
 
   //get all the domain names from the message
