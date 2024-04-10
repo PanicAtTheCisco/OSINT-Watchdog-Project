@@ -9,6 +9,7 @@ client.on('ready', async () => {
   console.log(`${client.user.username} is ready!`);
 })
 
+//listen for messages in the specified channel
 client.on('messageCreate', async (message) => {
   if (message.channel.id === channelId) {
     author_name = message.author.username;
@@ -39,6 +40,7 @@ async function sendToWebhook(server, channel, author_name, message_content, mess
   ips = "";
   domains = "";
 
+  //get all the ip addresses from the message
   const ipRegex = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
   const ipArray = message_content.match(ipRegex) || [];
   const validIpArray = ipArray.filter(ip => {
@@ -46,6 +48,7 @@ async function sendToWebhook(server, channel, author_name, message_content, mess
     return parts.every(part => parseInt(part, 10) >= 1 && parseInt(part, 10) <= 255);
   });
 
+  //get all the domain names from the message
   const domainRegex = /(?:[a-z]+\.[a-z]{2,})/gi;
   domainArray = message_content.match(domainRegex) || [];
 
