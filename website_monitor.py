@@ -4,6 +4,20 @@ from bs4 import BeautifulSoup
 import re
 import json
 
+# Set the URL of the web page you want to monitor
+url = "http://127.0.0.1:5500/test-site/index.html"
+
+# Set the Slack webhook URL
+# Load the configuration from the config.json file
+with open('config.json') as config_file:
+    config = json.load(config_file)
+
+# Get the webhook URL from the configuration
+webhook_url = config['webhook']
+
+# Initialize the variable to store the previous version of the web page
+previous_page_content = ""
+
 def send_slack_message(webhook_url, emails, domains):
     #Get the current date and time
     newDate = time.strftime("%m/%d/%Y, %I:%M:%S %p", time.localtime())
@@ -44,20 +58,6 @@ def send_slack_message(webhook_url, emails, domains):
         print("Message sent to Slack.")
     else:
         print(f"Failed to send message to Slack. Status code: {response.status_code}, Response: {response.text}")
-
-# Set the URL of the web page you want to monitor
-url = "http://127.0.0.1:5500/test-site/index.html"
-
-# Set the Slack webhook URL
-# Load the configuration from the config.json file
-with open('config.json') as config_file:
-    config = json.load(config_file)
-
-# Get the webhook URL from the configuration
-webhook_url = config['webhook']
-
-# Initialize the variable to store the previous version of the web page
-previous_page_content = ""
 
 def extract_emails(text):
     # Extract IP addresses using regular expression
