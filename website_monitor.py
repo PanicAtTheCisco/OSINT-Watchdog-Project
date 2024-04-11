@@ -15,9 +15,6 @@ with open('config.json') as config_file:
 # Get the webhook URL from the configuration
 webhook_url = config['webhook']
 
-# Initialize the variable to store the previous version of the web page
-previous_page_content = ""
-
 def send_slack_message(webhook_url, emails, domains):
     #Get the current date and time
     newDate = time.strftime("%m/%d/%Y, %I:%M:%S %p", time.localtime())
@@ -72,40 +69,46 @@ def extract_domains(text):
 
     return valid_domain_array
 
-while True:
-    try:
-        # Send a GET request to the web page
-        response = requests.get(url)
-        response.raise_for_status()
+def main():
+    # Initialize the variable to store the previous version of the web page
+    previous_page_content = ""
 
-        # Parse the HTML content of the web page
-        soup = BeautifulSoup(response.text, "html.parser")
-        current_page_content = str(soup)
+    while True:
+        try:
+            # Send a GET request to the web page
+            response = requests.get(url)
+            response.raise_for_status()
 
-        emails = ""
-        domains = ""
+            # Parse the HTML content of the web page
+            soup = BeautifulSoup(response.text, "html.parser")
+            current_page_content = str(soup)
 
-        # Check if the web page has been updated
-        if current_page_content != previous_page_content:
-            # Extract new IP addresses, domain names, and files
-            new_emails = set(extract_emails(current_page_content)) - set(extract_emails(previous_page_content))
-            new_domains = set(extract_domains(current_page_content)) - set(extract_domains(previous_page_content))
+            emails = ""
+            domains = ""
 
-            # Send a message to Slack with the new findings
-            if new_emails:
-                emails = "```" + '\n'.join(new_emails) + "```"
-            if new_domains:
-                domains = "```" + '\n'.join(new_domains) + "```"
+            # Check if the web page has been updated
+            if current_page_content != previous_page_content:
+                # Extract new IP addresses, domain names, and files
+                new_emails = set(extract_emails(current_page_content)) - set(extract_emails(previous_page_content))
+                new_domains = set(extract_domains(current_page_content)) - set(extract_domains(previous_page_content))
 
-            send_slack_message(webhook_url, emails, domains)
+                # Send a message to Slack with the new findings
+                if new_emails:
+                    emails = "```" + '\n'.join(new_emails) + "```"
+                if new_domains:
+                    domains = "```" + '\n'.join(new_domains) + "```"
 
-            # Update the previous page content
-            previous_page_content = current_page_content
+                send_slack_message(webhook_url, emails, domains)
 
-        # Wait for a certain amount of time before checking again
-        time.sleep(30)  # Adjust the interval as needed
+                # Update the previous page content
+                previous_page_content = current_page_content
 
-    except requests.exceptions.RequestException as e:
-        print("An error occurred:", e)
-        # Handle the error or exit the program
-        break
+            # Wait for a certain amount of time before checking again
+            time.sleep(30)  # Adjust the interval as needed
+
+        except requests.exceptions.RequestException as e:
+            print("An error occurred:", e)
+            # Handle the error or exit the program
+            break
+
+main()
