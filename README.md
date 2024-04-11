@@ -27,4 +27,4 @@
  First find a website and page of that website to monitor (no recursice scraping yet).
  Then, put the url into the url variable.
  Run the code.
- Note: the webhook data is taken from the config.json that is also used by the Discord Watchdog
+ Note: the webhook data is taken from the `config.json` that is also used by the Discord Watchdog
