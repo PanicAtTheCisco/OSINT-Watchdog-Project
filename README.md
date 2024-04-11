@@ -22,7 +22,7 @@
  This script is used to monitor a specific website page for Email Addresses and Domains and send the results to a slack webhook.
  ### Dependencies
  First install the latest version of [Python](https://www.python.org/).
- Then run 'pip install -r requirements.txt'
+ Then run 'pip install -r requirements.txt' in your preferred comand line.
  ### How to use
  First find a website and page of that website to monitor (no recursice scraping yet).
  Then, put the url into the url variable.
