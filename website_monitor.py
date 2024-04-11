@@ -3,7 +3,6 @@ import time
 from bs4 import BeautifulSoup
 import re
 import json
-import validators
 
 def send_slack_message(webhook_url, emails, domains):
     #Get the current date and time
@@ -66,16 +65,12 @@ def extract_emails(text):
     return re.findall(email_pattern, text)
 
 def extract_domains(text):
-    # Extract domain names using validators domain() function and matches common TLDs
-    # Note: This doesn't extract domains from emails or from URLs in the site
-    domains = []
-    lines = text.split('\n')
-    for line in lines:
-        words = line.split()
-        for word in words:
-            if validators.domain(word) and word.endswith(('.com', '.org', '.net', '.edu', '.gov', '.mil', '.int', '.arpa', '.aero', '.biz', '.coop', '.info', '.museum', '.name', '.pro', '.xyz')): # Add more TLDs as needed
-                domains.append(word)
-    return domains
+    domain_regex = r"(?:[a-z]+\.[a-z]+(?:\.[a-z]+)*)(?!\.[a-z]+)"
+    tlds = ['com', 'org', 'net', 'edu', 'gov', 'mil', 'int', 'arpa', 'aero', 'biz', 'coop', 'info', 'museum', 'name', 'pro', 'xyz']  # Add TLDs as needed
+    domain_array = re.findall(domain_regex, text, re.IGNORECASE)
+    valid_domain_array = [domain for domain in domain_array if domain.split('.')[-1].lower() in tlds]
+
+    return valid_domain_array
 
 while True:
     try:
