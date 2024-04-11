@@ -25,7 +25,7 @@ def send_slack_message(webhook_url, emails, domains):
             {
                 "type": "section",
                 "block_id": "header",
-                'text': {
+                "text": {
                     "type": "mrkdwn",
                     "text": ">" + newDate + "\n>`Website:` New updates to `" + url + "`"
                 }
@@ -69,9 +69,35 @@ def extract_domains(text):
 
     return valid_domain_array
 
+def make_wordlist(webhook_url, url, text):
+    # Get the current date and time
+    newDate = time.strftime("%m/%d/%Y, %I:%M:%S %p", time.localtime())
+
+    # Extract words using regular expression
+    word_pattern = r'\b\w+\b'
+    stripTrailingSymbols = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+    words = re.findall(word_pattern, re.sub(r'<.*?>', '', text), re.MULTILINE)
+    for word in words:
+        word.rstrip(stripTrailingSymbols)
+
+    wordlist = ', '.join(words)
+
+    payload = {
+        "text": ">" + newDate + "\n>`Website:` Wordlist for `" + url + "`\n`Wordlist:`\n```" + wordlist + "```"
+    }
+
+    response = requests.post(webhook_url, json=payload)
+
+    if response.status_code == 200:
+        print("Wordlist sent to Slack.")
+    else:
+        print(f"Failed to send wordlist to Slack. Status code: {response.status_code}, Response: {response.text}")
+
 def main():
     # Initialize the variable to store the previous version of the web page
     previous_page_content = ""
+
+    made_wordlist = False
 
     while True:
         try:
@@ -82,6 +108,11 @@ def main():
             # Parse the HTML content of the web page
             soup = BeautifulSoup(response.text, "html.parser")
             current_page_content = str(soup)
+
+            if made_wordlist == False:
+                # Initialize the wordlist
+                make_wordlist(webhook_url, url, current_page_content)
+                made_wordlist = True
 
             emails = ""
             domains = ""
