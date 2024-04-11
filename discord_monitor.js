@@ -35,7 +35,6 @@ client.on('messageCreate', async (message) => {
 //create a function to send a message with text and or attachments to the slack webhook
 async function sendToWebhook(server, channel, author_name, message_content, message_attachments) {
   const axios = require('axios');
-  const { isIP } = require('net');
   newDate = new Date().toLocaleString();
   ips = "";
   domains = "";
