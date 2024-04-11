@@ -38,6 +38,7 @@ async function sendToWebhook(server, channel, author_name, message_content, mess
   newDate = new Date().toLocaleString();
   ips = "";
   domains = "";
+  emails = "";
 
   //get all the ip addresses from the message
   const ipRegex = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
@@ -48,12 +49,13 @@ async function sendToWebhook(server, channel, author_name, message_content, mess
   });
 
   //get all the domain names from the message
+  //Note: This will get domains from any emails in the message as well
   const domainRegex = /(?:[a-z]+\.[a-z]+(?:\.[a-z]+)*)(?!\.[a-z]+)/gi;
-  const fileExtensions = ['html', 'htm', 'php', 'asp', 'aspx', 'jsp', 'cgi', 'pl', 'py', 'rb', 'java', 'cpp', 'c', 'cs', 'dll', 'exe', 'jar', 'war', 'zip', 'tar', 'gz', 'rar', '7z', 'iso', 'img', 'bin', 'dat', 'csv', 'txt', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf']; // Add your known file extensions here
+  const tlds = ['com', 'org', 'net', 'edu', 'gov', 'mil', 'int', 'arpa', 'aero', 'biz', 'coop', 'info', 'museum', 'name', 'pro', 'xyz']; // Add TLDs as needed
   const domainArray = message_content.match(domainRegex) || [];
   const validDomainArray = domainArray.filter(domain => {
     const extension = domain.split('.').pop();
-    return !fileExtensions.includes(extension.toLowerCase());
+    return tlds.includes(extension.toLowerCase());
   });
 
   const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;

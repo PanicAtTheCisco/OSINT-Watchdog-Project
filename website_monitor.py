@@ -33,7 +33,7 @@ def send_slack_message(webhook_url, emails, domains):
                 "block_id": "domains",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "`Domain Names (will be somewhat inaccurate):`\n" + domains
+                    "text": "`Domain Names:`\n" + domains
                 }
             }
         ]
@@ -66,13 +66,14 @@ def extract_emails(text):
     return re.findall(email_pattern, text)
 
 def extract_domains(text):
-    # Extract domain names using validators domain() function
+    # Extract domain names using validators domain() function and matches common TLDs
+    # Note: This doesn't extract domains from emails or from URLs in the site
     domains = []
     lines = text.split('\n')
     for line in lines:
         words = line.split()
         for word in words:
-            if validators.domain(word) and not word.endswith(('.html', '.htm', '.php', '.asp', '.aspx', '.jsp', '.cgi', '.pl', '.py', '.rb', '.java', '.cpp', '.c', '.cs', '.dll', '.exe', '.jar', '.war', '.zip', '.tar', '.gz', '.rar', '.7z', '.iso', '.img', '.bin', '.dat', '.csv', '.txt', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.pdf')):
+            if validators.domain(word) and word.endswith(('.com', '.org', '.net', '.edu', '.gov', '.mil', '.int', '.arpa', '.aero', '.biz', '.coop', '.info', '.museum', '.name', '.pro', '.xyz')): # Add more TLDs as needed
                 domains.append(word)
     return domains
 
