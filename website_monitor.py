@@ -7,7 +7,7 @@ import validators
 
 def send_slack_message(webhook_url, emails, domains):
     #Get the current date and time
-    newDate = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    newDate = time.strftime("%m/%d/%Y, %I:%M:%S %p", time.localtime())
 
     payload = {
         "text": "New updates to website!",
