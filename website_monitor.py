@@ -3,10 +3,40 @@ import time
 from bs4 import BeautifulSoup
 import re
 import json
+import validators
 
-def send_slack_message(webhook_url, message):
+def send_slack_message(webhook_url, emails, domains):
+    #Get the current date and time
+    newDate = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
     payload = {
-        "text":message
+        "text": "New updates to website!",
+        "blocks": [
+            {
+                "type": "section",
+                "block_id": "header",
+                'text': {
+                    "type": "mrkdwn",
+                    "text": ">" + newDate + "\n>`Website:` New updates to `" + url + "`"
+                }
+            },
+            {
+                "type": "section",
+                "block_id": "emails",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "`Email Addresses:`\n" + emails
+                }
+            },
+            {
+                "type": "section",
+                "block_id": "domains",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "`Domain Names (will be somewhat inaccurate):`\n" + domains
+                }
+            }
+        ]
     }
 
     response = requests.post(webhook_url, json=payload)
@@ -30,20 +60,21 @@ webhook_url = config['webhook']
 # Initialize the variable to store the previous version of the web page
 previous_page_content = ""
 
-def extract_ips(text):
+def extract_emails(text):
     # Extract IP addresses using regular expression
-    ip_pattern = r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
-    return re.findall(ip_pattern, text)
+    email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"
+    return re.findall(email_pattern, text)
 
 def extract_domains(text):
-    # Extract domain names using regular expression
-    domain_pattern = r"\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b"
-    return re.findall(domain_pattern, text)
-
-def extract_files(text):
-    # Extract file names using regular expression
-    file_pattern = r"\b\w+\.\w+\b"
-    return re.findall(file_pattern, text)
+    # Extract domain names using validators domain() function
+    domains = []
+    lines = text.split('\n')
+    for line in lines:
+        words = line.split()
+        for word in words:
+            if validators.domain(word) and not word.endswith(('.html', '.htm', '.php', '.asp', '.aspx', '.jsp', '.cgi', '.pl', '.py', '.rb', '.java', '.cpp', '.c', '.cs', '.dll', '.exe', '.jar', '.war', '.zip', '.tar', '.gz', '.rar', '.7z', '.iso', '.img', '.bin', '.dat', '.csv', '.txt', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.pdf')):
+                domains.append(word)
+    return domains
 
 while True:
     try:
@@ -55,20 +86,22 @@ while True:
         soup = BeautifulSoup(response.text, "html.parser")
         current_page_content = str(soup)
 
+        emails = ""
+        domains = ""
+
         # Check if the web page has been updated
         if current_page_content != previous_page_content:
             # Extract new IP addresses, domain names, and files
-            new_ips = set(extract_ips(current_page_content)) - set(extract_ips(previous_page_content))
+            new_emails = set(extract_emails(current_page_content)) - set(extract_emails(previous_page_content))
             new_domains = set(extract_domains(current_page_content)) - set(extract_domains(previous_page_content))
-            new_files = set(extract_files(current_page_content)) - set(extract_files(previous_page_content))
 
             # Send a message to Slack with the new findings
-            if new_ips:
-                send_slack_message(webhook_url, f"New IP addresses found: {', '.join(new_ips)}")
+            if new_emails:
+                emails = "```" + '\n'.join(new_emails) + "```"
             if new_domains:
-                send_slack_message(webhook_url, f"New domain names found: {', '.join(new_domains)}")
-            # if new_files:
-            #     send_slack_message(webhook_url, f"New files found: {', '.join(new_files)}")
+                domains = "```" + '\n'.join(new_domains) + "```"
+
+            send_slack_message(webhook_url, emails, domains)
 
             # Update the previous page content
             previous_page_content = current_page_content

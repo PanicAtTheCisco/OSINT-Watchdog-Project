@@ -49,14 +49,25 @@ async function sendToWebhook(server, channel, author_name, message_content, mess
   });
 
   //get all the domain names from the message
-  const domainRegex = /(?:[a-z]+\.[a-z]{2,})/gi;
-  domainArray = message_content.match(domainRegex) || [];
+  const domainRegex = /(?:[a-z]+\.[a-z]+(?:\.[a-z]+)*)(?!\.[a-z]+)/gi;
+  const fileExtensions = ['html', 'htm', 'php', 'asp', 'aspx', 'jsp', 'cgi', 'pl', 'py', 'rb', 'java', 'cpp', 'c', 'cs', 'dll', 'exe', 'jar', 'war', 'zip', 'tar', 'gz', 'rar', '7z', 'iso', 'img', 'bin', 'dat', 'csv', 'txt', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf']; // Add your known file extensions here
+  const domainArray = message_content.match(domainRegex) || [];
+  const validDomainArray = domainArray.filter(domain => {
+    const extension = domain.split('.').pop();
+    return !fileExtensions.includes(extension.toLowerCase());
+  });
+
+  const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
+  const emailArray = message_content.match(emailRegex) || [];
 
   if (ipArray.length !== 0) {
     ips = "```" + validIpArray.join("\n") + "```";
   }
   if (domainArray.length !== 0) {
-    domains = "```" + domainArray.join("\n") + "```";
+    domains = "```" + validDomainArray.join("\n") + "```";
+  }
+  if (emailArray.length !== 0) {
+    emails = "```" + emailArray.join("\n") + "```";
   }
 
   try {
@@ -93,6 +104,14 @@ async function sendToWebhook(server, channel, author_name, message_content, mess
           "text": {
             "type": "mrkdwn",
             "text": "\n`Domains:`\n" + domains
+          }
+        },
+        {
+          "type": "section",
+          "block_id": "email",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\n`Email Addresses:`\n" + emails
           }
         },
         {
