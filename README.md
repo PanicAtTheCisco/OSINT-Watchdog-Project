@@ -19,7 +19,7 @@
  Run `node .` in the terminal to start the script and it will start monitoring the channel.
 
  ## Website Watchdog
- This script is used to monitor a specific website page for Email Addresses and Domains and send the results to a slack webhook.
+ This script is used to monitor a specific website page for Email Addresses and Domains and send the results to a slack webhook. It will also generate a wordlist of the site and send that to a slack webhook too.
  ### Dependencies
  First install the latest version of [Python](https://www.python.org/).
  Then run `pip install -r requirements.txt` in your preferred comand line.
