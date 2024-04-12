@@ -1,3 +1,5 @@
+# Note: this is for testing that your slack webhook is working properly
+
 import requests
 
 def send_slack_message(webhook_url, message):
