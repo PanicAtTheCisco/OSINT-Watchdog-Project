@@ -5,7 +5,7 @@ import re
 import json
 
 # Set the URL of the web page you want to monitor
-url = "http://127.0.0.1:5500/test-site/index.html"
+url = "<CHANGE ME>"
 
 # Set the Slack webhook URL
 # Load the configuration from the config.json file
@@ -86,7 +86,7 @@ def make_wordlist(webhook_url, url, text):
     wordlist = ', '.join(words)
 
     payload = {
-        "text": ">" + newDate + "\n>`Website:` Wordlist for `" + url + "`\n`Wordlist:`\n```" + wordlist + "```"
+        "text": ">" + newDate + "\n>`Website:` Wordlist for `" + url + "`\n`Wordlist:`\n" + wordlist
     }
 
     response = requests.post(webhook_url, json=payload)
