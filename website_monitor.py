@@ -15,6 +15,9 @@ with open('config.json') as config_file:
 # Get the webhook URL from the configuration
 webhook_url = config['webhook']
 
+# Set the interval for checking the web page (in seconds)
+interval = 60  # Adjust the interval as needed
+
 def send_slack_message(webhook_url, emails, domains):
     #Get the current date and time
     newDate = time.strftime("%m/%d/%Y, %I:%M:%S %p", time.localtime())
@@ -135,7 +138,7 @@ def main():
                 previous_page_content = current_page_content
 
             # Wait for a certain amount of time before checking again
-            time.sleep(30)  # Adjust the interval as needed
+            time.sleep(interval)  # Adjust the interval as needed
 
         except requests.exceptions.RequestException as e:
             print("An error occurred:", e)
