@@ -2,7 +2,7 @@
  This script is used to monitor a specific channel in a discord server for Message Contents, IP addresses, Domains, Email Addresses, and Attachments, then send them to a slack webhook.
 ### Dependencies
  First, install `node.js`
- Install either `discord.js` if you are using a normal bot or a discord self bot library such as discord.js-selfbot-v13 if you are using a user account (against Discord's TOS you may get the user account banned)
+ Install either `discord.js` if you are using a normal bot or a discord self bot library such as `discord.js-selfbot-v13` if you are using a user account (against Discord's TOS you may get the user account banned)
 ### How to use
  To make it work, create a discord account or bot and a slack workspace.
  Then, create a webhook in the slack workspace and get the discord account or bot in the discord server.
